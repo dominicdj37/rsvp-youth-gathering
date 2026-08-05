@@ -1056,7 +1056,7 @@ document.getElementById('scrollHint').addEventListener('click', () => {
 ============================================================ */
 async function shareInvite(){
   const shareUrl = 'https://dominicdj37.github.io/rsvp-youth-gathering/';
-  const shareText = "You're invited to Youth Gathering — Faith, Fellowship & Fire! Aug 15, 9:30 AM at IPC Rajapalya Church.";
+  const shareText = "You're invited to PYPA Youth Gathering — Faith, Fellowship & Fire! Aug 15, 9:30 AM at IPC Rajapalya Church.\nClick the below link to RSVP";
 
   let posterFile = null;
   try {
@@ -1079,7 +1079,7 @@ async function shareInvite(){
   }
 
   try {
-    await navigator.clipboard.writeText(`${shareText} ${shareUrl}`);
+    await navigator.clipboard.writeText(`${shareText}\n${shareUrl}`);
     alert('Invite link copied! Paste it anywhere to share.');
   } catch (err) {
     window.open(shareUrl, '_blank');
