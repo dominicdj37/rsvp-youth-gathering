@@ -170,6 +170,12 @@
     transition: color .12s ease, border-color .12s ease;
   }
   .info-value-link:hover{color:var(--gold-bright); border-color:var(--gold-bright);}
+  .info-subtext{
+    margin-top:4px;
+    font-size:10px;
+    letter-spacing:.04em;
+    color:var(--ash);
+  }
 
   .hero-cta{
     margin-top:26px;
@@ -809,6 +815,7 @@
         <div class="info-item">
           <div class="info-label">VENUE</div>
           <a class="info-value info-value-link" href="https://maps.app.goo.gl/5VYvrC8y5XRzDkeP7" target="_blank" rel="noopener">IPC Rajapalya Church</a>
+          <div class="info-subtext">Tap to navigate</div>
         </div>
         <div class="info-item">
           <div class="info-label">DATE</div>
@@ -822,6 +829,7 @@
 
       <button class="hero-cta" id="openRsvpBtn">Count Me In</button>
       <a class="hero-cta-alt" href="#support">Can't come? I'll support</a>
+      <button class="hero-cta-alt" id="shareEventBtn" type="button">Share This Invite</button>
     </div>
 
     <div class="scroll-hint" id="scrollHint">
@@ -1042,6 +1050,42 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal
 document.getElementById('scrollHint').addEventListener('click', () => {
   document.getElementById('highlights').scrollIntoView({behavior:'smooth'});
 });
+
+/* ============================================================
+   1b) SHARE THE INVITE (poster image + page link)
+============================================================ */
+async function shareInvite(){
+  const shareUrl = 'https://dominicdj37.github.io/rsvp-youth-gathering/';
+  const shareText = "You're invited to Youth Gathering — Faith, Fellowship & Fire! Aug 15, 9:30 AM at IPC Rajapalya Church.";
+
+  let posterFile = null;
+  try {
+    const response = await fetch('assets/poster.png');
+    const blob = await response.blob();
+    posterFile = new File([blob], 'youth-gathering-poster.png', { type: blob.type });
+  } catch (err) { /* no poster available, share link only */ }
+
+  if (navigator.share) {
+    const canShareFile = posterFile && navigator.canShare && navigator.canShare({ files: [posterFile] });
+    const shareData = canShareFile
+      ? { files: [posterFile], title: 'Youth Gathering — PYPA IPC Rajapalya', text: `${shareText}\n${shareUrl}` }
+      : { title: 'Youth Gathering — PYPA IPC Rajapalya', text: shareText, url: shareUrl };
+    try {
+      await navigator.share(shareData);
+      return;
+    } catch (err) {
+      if (err.name === 'AbortError') return;
+    }
+  }
+
+  try {
+    await navigator.clipboard.writeText(`${shareText} ${shareUrl}`);
+    alert('Invite link copied! Paste it anywhere to share.');
+  } catch (err) {
+    window.open(shareUrl, '_blank');
+  }
+}
+document.getElementById('shareEventBtn').addEventListener('click', shareInvite);
 
 /* ============================================================
    2) ADD ADDITIONAL GUESTS
