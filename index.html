@@ -184,6 +184,29 @@
     100%{box-shadow:0 0 0 0 rgba(255,140,60,0);}
   }
 
+  .hero-cta-alt{
+    display:inline-block;
+    margin-top:14px;
+    padding:13px 30px;
+    border:1px solid var(--line);
+    border-radius:100px;
+    background:transparent;
+    color:var(--gold);
+    font-family:inherit;
+    font-weight:600;
+    font-size:12px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    text-decoration:none;
+    cursor:pointer;
+    transition: transform .12s ease, border-color .12s ease, color .12s ease;
+  }
+  .hero-cta-alt:hover{border-color:var(--gold-bright); color:var(--gold-bright); transform:translateY(-1px);}
+  .hero-cta-alt:active{transform:scale(0.98);}
+  @media (max-width:420px){
+    .hero-cta-alt{font-size:11px; padding:12px 20px;}
+  }
+
   .scroll-hint{
     position:absolute;
     bottom:18px;
@@ -787,6 +810,7 @@
       </div>
 
       <button class="hero-cta" id="openRsvpBtn">Count Me In</button>
+      <a class="hero-cta-alt" href="#support">Can't come? I'll support</a>
     </div>
 
     <div class="scroll-hint" id="scrollHint">
