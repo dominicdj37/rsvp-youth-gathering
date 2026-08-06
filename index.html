@@ -6,6 +6,26 @@
 <title>Youth Gathering — Faith, Fellowship & Fire</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Dancing+Script:wght@600;700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script type="module">
+  /* Firebase Analytics — auto-tracks page_view/first_visit/session_start.
+     window.gaLog is called by the main script below for button/share events. */
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js";
+  import { getAnalytics, logEvent } from "https://www.gstatic.com/firebasejs/12.17.1/firebase-analytics.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAGYw6eZ6lz1DcX-pPpZhmKZj100JixOs0",
+    authDomain: "pypa-780ea.firebaseapp.com",
+    projectId: "pypa-780ea",
+    storageBucket: "pypa-780ea.firebasestorage.app",
+    messagingSenderId: "391273814174",
+    appId: "1:391273814174:web:c6eda83edf5c86f15e838f",
+    measurementId: "G-LC2JT3X6KX"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+  window.gaLog = (name, params) => logEvent(analytics, name, params);
+</script>
 <style>
   :root{
     --black:#0a0908;
@@ -1026,6 +1046,8 @@
 ============================================================ */
 const SHEET_ENDPOINT = "https://script.google.com/macros/s/AKfycbwVL8jQzix2H3CihXetwqYUFkuFNBbRQcR3DFVHW5HG1mHeZoYDR_S-42L5n0wtLRtBmg/exec";
 
+function track(name, params){ if (window.gaLog) window.gaLog(name, params); }
+
 /* ============================================================
    1) RSVP MODAL OPEN / CLOSE
 ============================================================ */
@@ -1042,7 +1064,7 @@ function closeModal(){
   modal.classList.remove('open');
   document.body.classList.remove('modal-open');
 }
-openBtn.addEventListener('click', openModal);
+openBtn.addEventListener('click', () => { track('button_click', {button_name:'open_rsvp'}); openModal(); });
 closeBtn.addEventListener('click', closeModal);
 modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
@@ -1072,6 +1094,7 @@ async function shareInvite(){
       : { title: 'Youth Gathering — PYPA IPC Rajapalya', text: shareText, url: shareUrl };
     try {
       await navigator.share(shareData);
+      track('share', {method: canShareFile ? 'native_share_file' : 'native_share', content_type:'invite'});
       return;
     } catch (err) {
       if (err.name === 'AbortError') return;
@@ -1081,11 +1104,13 @@ async function shareInvite(){
   try {
     await navigator.clipboard.writeText(`${shareText}\n${shareUrl}`);
     alert('Invite link copied! Paste it anywhere to share.');
+    track('share', {method:'clipboard', content_type:'invite'});
   } catch (err) {
     window.open(shareUrl, '_blank');
+    track('share', {method:'new_tab_fallback', content_type:'invite'});
   }
 }
-document.getElementById('shareEventBtn').addEventListener('click', shareInvite);
+document.getElementById('shareEventBtn').addEventListener('click', () => { track('button_click', {button_name:'share_invite'}); shareInvite(); });
 
 /* ============================================================
    2) ADD ADDITIONAL GUESTS
@@ -1123,7 +1148,7 @@ function addGuestBlock(){
   block.querySelector('.remove-guest-btn').addEventListener('click', () => block.remove());
 }
 
-addPersonBtn.addEventListener('click', addGuestBlock);
+addPersonBtn.addEventListener('click', () => { track('button_click', {button_name:'add_guest'}); addGuestBlock(); });
 
 /* ============================================================
    3) RSVP FORM SUBMIT
@@ -1134,6 +1159,7 @@ const submitBtn = document.getElementById('submitBtn');
 
 form.addEventListener('submit', (e) => {
   e.preventDefault();
+  track('button_click', {button_name:'submit_rsvp'});
   statusBox.className = 'status';
   statusBox.textContent = '';
 
@@ -1158,9 +1184,11 @@ form.addEventListener('submit', (e) => {
       form.reset();
       guestsContainer.innerHTML = '';
       guestCount = 0;
+      track('rsvp_submit', {status:'success', party_size: params.get('party_size')});
     } else {
       statusBox.className = 'status error';
       statusBox.textContent = msg || 'Could not save your RSVP — please try again, or message a coordinator below.';
+      track('rsvp_submit', {status:'error', message: msg || 'unknown'});
     }
     submitBtn.disabled = false;
     submitBtn.textContent = 'Confirm RSVP';
@@ -1216,6 +1244,7 @@ const contactBtn = document.getElementById('contactFillBtn');
 if ('contacts' in navigator && 'ContactsManager' in window) {
   contactBtn.style.display = 'block';
   contactBtn.addEventListener('click', async () => {
+    track('button_click', {button_name:'contact_autofill'});
     try {
       const [contact] = await navigator.contacts.select(['name','tel'], {multiple:false});
       if (contact) {
@@ -1341,8 +1370,14 @@ if (isMobile) {
   upiHint.textContent = 'On a computer? Scan the QR with your phone, or copy the UPI ID below.';
 }
 
+upiPayBtn.addEventListener('click', () => track('button_click', {button_name:'upi_pay'}));
+document.querySelectorAll('.upi-app-btn').forEach(btn => {
+  btn.addEventListener('click', () => track('button_click', {button_name:'upi_pay_' + btn.dataset.app}));
+});
+
 const copyUpiBtn = document.getElementById('copyUpiBtn');
 copyUpiBtn.addEventListener('click', async () => {
+  track('button_click', {button_name:'copy_upi'});
   try {
     await navigator.clipboard.writeText(UPI_ID);
     copyUpiBtn.textContent = 'Copied';
